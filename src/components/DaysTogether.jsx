@@ -1,0 +1,180 @@
+"use client"
+
+import { useState, useEffect } from "react"
+import { motion } from "framer-motion"
+
+export default function DaysTogether({ startDate, animationDuration = 3 }) {
+    const [displayedDuration, setDisplayedDuration] = useState("7 năm")
+    const [animationComplete, setAnimationComplete] = useState(false)
+
+    useEffect(() => {
+        const calculateDuration = () => {
+            const start = new Date(startDate)
+            const now = new Date()
+
+            if (Number.isNaN(start.getTime()) || now < start) {
+                return "0 năm, 0 tháng, 0 ngày, 0 giờ"
+            }
+
+            const cursor = new Date(start)
+
+            let years = now.getFullYear() - cursor.getFullYear()
+            cursor.setFullYear(cursor.getFullYear() + years)
+            if (cursor > now) {
+                years -= 1
+                cursor.setFullYear(cursor.getFullYear() - 1)
+            }
+
+            let months = (now.getFullYear() - cursor.getFullYear()) * 12 + (now.getMonth() - cursor.getMonth())
+            cursor.setMonth(cursor.getMonth() + months)
+            if (cursor > now) {
+                months -= 1
+                cursor.setMonth(cursor.getMonth() - 1)
+            }
+
+            let days = 0
+            while (true) {
+                const nextDay = new Date(cursor)
+                nextDay.setDate(nextDay.getDate() + 1)
+                if (nextDay <= now) {
+                    days += 1
+                    cursor.setDate(cursor.getDate() + 1)
+                } else {
+                    break
+                }
+            }
+
+            const hours = Math.floor((now - cursor) / (1000 * 60 * 60))
+
+            return `${years} năm, ${months} tháng, ${days} ngày, ${hours} giờ`
+        }
+
+        setDisplayedDuration(calculateDuration())
+        const interval = setInterval(() => {
+            setDisplayedDuration(calculateDuration())
+        }, 1000)
+
+        const animationTimeout = setTimeout(() => {
+            setAnimationComplete(true)
+        }, animationDuration * 1000)
+
+        return () => {
+            clearInterval(interval)
+            clearTimeout(animationTimeout)
+        }
+    }, [startDate, animationDuration])
+
+    return (
+        <motion.div
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            className="my-16 py-12 px-6 relative"
+        >
+            <div className="absolute inset-0 bg-white rounded-3xl shadow-2xl overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-br from-pink-50 to-purple-50" />
+
+                <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-pink-400 to-purple-400" />
+                <div className="absolute bottom-0 right-0 w-full h-2 bg-gradient-to-r from-purple-400 to-pink-400" />
+
+                {/* Decorative elements */}
+                <div className="absolute top-4 left-4 text-4xl animate-float">💖</div>
+                <div className="absolute bottom-4 right-4 text-4xl animate-float-delay">💘</div>
+                <div className="absolute top-1/4 right-10 text-3xl animate-float" style={{ animationDelay: "1s" }}>
+                    💝
+                </div>
+            </div>
+
+            <div className="relative z-10">
+                <motion.h2
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.3 }}
+                    className="text-3xl md:text-4xl md:py-1 font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-500 via-purple-500 to-pink-500 text-center mb-10 animate-gradient"
+                >
+                    Rất hân hạnh và may mắn vì anh đã được làm bạn trai của em trong
+                </motion.h2>
+
+                <div className="flex flex-col items-center justify-center">
+                    <div className="relative">
+                        <motion.div
+                            className="text-2xl md:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-br from-pink-500 to-purple-500 mb-6 animate-gradient text-center leading-relaxed"
+                            initial={{ scale: 0.5, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            transition={{ type: "spring", stiffness: 100 }}
+                        >
+                            {displayedDuration}
+                        </motion.div>
+
+                        {/* Animated particles around the number */}
+                        {animationComplete && (
+                            <div className="absolute inset-0 pointer-events-none">
+                                {Array.from({ length: 8 }).map((_, i) => (
+                                    <motion.div
+                                        key={i}
+                                        className="absolute text-xl"
+                                        initial={{
+                                            x: 0,
+                                            y: 0,
+                                            opacity: 0,
+                                        }}
+                                        animate={{
+                                            x: (Math.random() - 0.5) * 150,
+                                            y: (Math.random() - 0.5) * 150,
+                                            opacity: [0, 0.8, 0],
+                                            scale: [0.5, 1.5, 0.5],
+                                            rotate: Math.random() * 360,
+                                        }}
+                                        transition={{
+                                            duration: 2 + Math.random() * 2,
+                                            repeat: Number.POSITIVE_INFINITY,
+                                            delay: Math.random() * 2,
+                                            ease: "easeInOut",
+                                        }}
+                                    >
+                                        {["❤️", "✨", "💖", "💘", "💝"][Math.floor(Math.random() * 5)]}
+                                    </motion.div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+
+                    <motion.div
+                        initial={{ scale: 0.8, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        transition={{ delay: 0.5 }}
+                        className="text-2xl md:text-3xl text-pink-500 font-medium mb-8"
+                    >
+                        Một chặng đường trưởng thành của anh nè
+                    </motion.div>
+
+                    <motion.div
+                        initial={{ opacity: 0, width: 0 }}
+                        animate={{ opacity: 1, width: "100px" }}
+                        transition={{ delay: 1, duration: 0.8 }}
+                        className="h-1 bg-gradient-to-r from-pink-400 to-purple-400 rounded-full mb-8"
+                    />
+
+                    <motion.p
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: 1.2 }}
+                        className="text-center text-lg text-gray-600 max-w-2xl"
+                    >
+                        Nhờ có em đó hyen hyen. Từ những lần trêu đùa nhau ở Savor cho đến những ngày tháng chúng mình bàn về hôn nhân. Một hành trình đầy những khoảnh khắc tuyệt vời đúng không vợ yêu.
+                    </motion.p>
+
+                    <motion.div
+                        initial={{ scale: 0, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        transition={{ delay: 1.5, type: "spring" }}
+                        className="mt-8 text-5xl"
+                    >
+                        🥂
+                    </motion.div>
+                </div>
+            </div>
+        </motion.div>
+    )
+}
+
